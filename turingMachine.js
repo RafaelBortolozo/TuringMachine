@@ -9,7 +9,7 @@
  *    ᗣ = caracter vazio,
  *    ઠ = objeto com todos os comandos, no formato (q0,1,q1,A,R)
  * 
- *    Por motivos de compatibilidade, os icones foram substituidos por texto
+ *    Por motivos de incompatibilidade, os icones foram substituidos por texto
  *  }
  */
 
