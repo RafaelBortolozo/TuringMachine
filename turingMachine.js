@@ -40,23 +40,43 @@ function girininho(str){
 }
 
 function TM(obj){
-  let fita = []
-  for(let i=0; i<6; i++) fita.push(obj.empty)
+  obj.states= stringToArray(obj.states)
+  obj.alphabet= stringToArray(obj.alphabet)
+  obj.test= stringToArray(obj.test)
   
+  let fita = []
+  for(let i=0; i<4; i++) fita.push(obj.empty) //4 caracteres vazios no inicio
+  fita = [...fita, obj.test]                  //caracteres de teste no meio
+  for(let i=0; i<4; i++) fita.push(obj.empty) //4 caracteres vazios no final
+                                              //§§§§123123§§§§
   return {...obj, fita}
 }
 
-function calculate(tm){
-  tm.states= stringToArray(tm.states)
-  tm.alphabet= stringToArray(tm.alphabet)
-  tm.test= stringToArray(tm.test)
-  let cont= 0
-  let pont= 3
-  let testLength= tm.test.length()
+function directionToInt(str){
+  let direction
+  if(str == "R") direction= 1
+  else if(str == "L") direction= -1
+  else if(str == "S") direction= 0
+  return direction
+}
 
-  for(let i=0 ; i<testLength-1 ; i++){
-    const character = tm.test[i]
-    
+function calculate(tm){
+  let ponteiroFita= 4
+  let currentStateFita= tm.initState
+  let fitaLength= tm.fita.length()
+  let direction
+
+  for(;;){ //percorre a fita e salva o caractere apontado 
+    let currentCharacterFita = tm.fita[ponteiroFita]
+
+    for(let girininho in tm.commands){ //percorre todos os girininhos, em busca do "read match" 
+      if(girininho.read.currentState == currentStateFita && girininho.read.char == currentCharacterFita){ //se encontrar, executa a acao do girininho
+        currentStateFita = girininho.execute.goState            //vai para tal estado
+        tm.fita[ponteiroFita] = girininho.execute.write         //substitui o caractere
+        direction = directionToInt(girininho.execute.direction) //vai para tal direcao
+      }
+    }
+
   }
 }
 
@@ -68,7 +88,7 @@ const turingMachine = TM({
   initState: "0",
   endState: "1",
   empty: "§",
-  comands: [
+  commands: [
     girininho("0,a,0,1,R"),
     girininho("0,b,0,2,R"),
     girininho("0,c,0,3,R"),
