@@ -15,6 +15,7 @@
 
 //*************** FUNCTIONS ********************* */
 function stringToArray(str){
+  str = str.replace(/\s/g, '')
   if(str.indexOf(",") != -1){
     str = str.split(",")
   }else{
@@ -46,7 +47,7 @@ function TM(obj){
 
 //********************** MAQUINA DE TURING ************************ */
 const turingMachine = TM({
-  states: "0",
+  states: "0,1",
   alphabet: "a,b,c,1,2,3,§",
   test: "a,b,c,a,b,c",
   initState: "0",
@@ -65,7 +66,7 @@ turingMachine.states = stringToArray(turingMachine.states)
 turingMachine.alphabet = stringToArray(turingMachine.alphabet)
 turingMachine.test = stringToArray(turingMachine.test)
 
-console.log(turingMachine)
-let ponteiro = 3
+console.log(turingMachine.states)
+//let ponteiro = 3
 
 
