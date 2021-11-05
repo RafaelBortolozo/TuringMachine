@@ -24,18 +24,19 @@ function stringToArray(str){
   return str
 }
 
-function girininho(currentState, char, goState, write, direction){
+function girininho(str){
+  const array = stringToArray(str)
   return {
     read: {
-      currentState,
-      char,
+      currentState = array[0],
+      char = array[1],
     },
-    execute: {
-      goState,
-      write,
-      direction
-    }
-  } 
+      execute: {
+        goState = array[2],
+        write = array[3],
+        direction = array[4]
+      }
+  }
 }
 
 function TM(obj){
@@ -43,6 +44,20 @@ function TM(obj){
   for(let i=0; i<6; i++) fita.push(obj.empty)
   
   return {...obj, fita}
+}
+
+function calculate(tm){
+  tm.states= stringToArray(tm.states)
+  tm.alphabet= stringToArray(tm.alphabet)
+  tm.test= stringToArray(tm.test)
+  let cont= 0
+  let pont= 3
+  let testLength= tm.test.length()
+
+  for(let i=0 ; i<testLength-1 ; i++){
+    const character = tm.test[i]
+    
+  }
 }
 
 //********************** MAQUINA DE TURING ************************ */
@@ -54,19 +69,17 @@ const turingMachine = TM({
   endState: "1",
   empty: "§",
   comands: [
-    girininho("0", "a", "0", "1", "R"),
-    girininho("0", "b", "0", "2", "R"),
-    girininho("0", "c", "0", "3", "R"),
-    girininho("0", "§", "1", "§", "S")
+    girininho("0,a,0,1,R"),
+    girininho("0,b,0,2,R"),
+    girininho("0,c,0,3,R"),
+    girininho("0,§,1,§,S")
   ]
 })
 
-//turingMachine.Q.split(",")
-turingMachine.states = stringToArray(turingMachine.states)
-turingMachine.alphabet = stringToArray(turingMachine.alphabet)
-turingMachine.test = stringToArray(turingMachine.test)
+calculate(turingMachine)
 
-console.log(turingMachine.states)
-//let ponteiro = 3
+//********************END MAQUINA DE TURING************************ */
+
+
 
 
