@@ -1,4 +1,3 @@
-
 //*************** FUNCTIONS ********************* */
 function stringToArray(str){
   str = str.replace(/\s/g, '')
@@ -48,10 +47,12 @@ function directionToInt(str){
 }
 
 function calculate(tm){
-  const error = "\n\nNão foi possível resolver essa máquina de Turing"
+  const error = "\n\tNão foi possível resolver essa máquina de Turing, verifique as entradas!\n"
   let ponteiroFita = 4
   let currentStateFita = tm.initState
   let direction
+
+  if(!machineVerification(tm)) return error
 
   for(;;){ //percorre a fita e salva o caractere apontado 
     let currentCharacterFita = tm.fita[ponteiroFita]
@@ -83,24 +84,39 @@ function calculate(tm){
   }
 }
 
-//********************** MAQUINA DE TURING ************************ */
+function machineVerification(tm){
+  //verificar empty
+  if(!tm.alphabet.includes(tm.empty)) return false
+
+  //verificar estados e alfabeto
+  for(let girininho of tm.commands){
+    if(!tm.states.includes(girininho.read.currentState)) return false
+    if(!tm.states.includes(girininho.execute.goState)) return false 
+    if(!tm.alphabet.includes(girininho.read.char)) return false
+    if(!tm.alphabet.includes(girininho.execute.write)) return false
+  }
+
+  return true
+}
+
+//********************************* MAQUINA DE TURING ********************************** */
 const turingMachine = TM({
   states: "0,1",
-  alphabet: "a,1,¨", 
+  alphabet: "a,b,c,1,2,3", 
   test: "abcabc",
   initState: "0",
   endState: "1",
-  empty: "¨",
+  empty: "¬",
   commands: [
     girininho("0,a,0,1,R"),
     girininho("0,b,0,2,R"),
     girininho("0,c,0,3,R"),
-    girininho("0,¨,1,¨,S")
+    girininho("0,¬,1,¬,S")
   ]
 })
 
 const result= calculate(turingMachine)
 console.log(result)
 
-//********************END MAQUINA DE TURING************************ */
+//********************************END MAQUINA DE TURING************************************ */
 
