@@ -24,41 +24,39 @@ const girininho = (str) => {
   }
 }
 
-const TM = (obj) => {
-  obj.states= stringToArray(obj.states)
-  obj.alphabet= stringToArray(obj.alphabet)
-  obj.test= stringToArray(obj.test)
-  
+const createTuringMachine = (obj) => {
+  obj.Q = stringToArray(obj.Q)
+  obj.sigma = stringToArray(obj.sigma)
+  obj.gama = stringToArray(obj.gama)
+  obj.F = stringToArray(obj.F)
+
   let fita = []
-  for(let i=0; i<4; i++) fita.push(obj.empty) // 4 caracteres vazios no inicio
-  fita = fita.concat(obj.test)                // caracteres de teste no meio
-  for(let i=0; i<4; i++) fita.push(obj.empty) // 4 caracteres vazios no final
-                                              // -,-,-,-,1,2,3,1,2,3,-,-,-,-
+  for(let i=0; i<3; i++) fita.push(obj.B)
+  fita = fita.concat(obj.gama)                
+  for(let i=0; i<3; i++) fita.push(obj.B)
 
   return {...obj, fita}
 }
 
 const directionToInt = (str) => {
-  let direction
-  if(str == "R") direction= 1
-  else if(str == "L") direction= -1
-  else if(str == "S") direction= 0
-  return direction
+  if(str == "R") return 1
+  if(str == "L") return -1
+  if(str == "S") return 0
 }
 
 const calculate= (tm) => {
-  const error = "\n\tNão foi possível resolver essa máquina de Turing, verifique as entradas!\n"
-  let ponteiroFita = 4
-  let currentStateFita = tm.initState
+  const error = "\n\tNão foi possível resolver a máquina de Turing!\n"
+  let ponteiroFita = 3
+  let currentStateFita = tm.q0
   let direction
 
-  if(!machineVerification(tm)) return error
+  if(!machineVerification(tm)) return error //verificar dados da maquina
 
   for(;;){ //percorre a fita e salva o caractere apontado 
     let currentCharacterFita = tm.fita[ponteiroFita]
     let count = 0
 
-    for(let girininho of tm.commands){ //percorre todos os girininhos, em busca do "read match" 
+    for(let girininho of tm.delta){ //percorre todos os girininhos, em busca do "read match" 
       if(girininho.read.currentState == currentStateFita && girininho.read.char == currentCharacterFita){ //se encontrar, executa a acao do girininho
         currentStateFita = girininho.execute.goState            //vai para tal estado
         tm.fita[ponteiroFita] = girininho.execute.write         //substitui o caractere
@@ -67,54 +65,64 @@ const calculate= (tm) => {
         
         // Se detectar direction "S" e o estado final informado,
         // o algoritmo termina e retorna a fita
-        if(direction == 0 && currentStateFita == tm.endState){
+        if(direction == 0 && tm.F.includes(currentStateFita)){
           let result = tm.fita.toString()
           result = result.replace(/,/g," ")
           result = "\nResult: " + result
           return result
         }
         
-        // Caso contrário, apenas continue
+        // Caso contrário, apenas continue com o proximo caractere da fita
         break
       }
       
       count++ //contador para verificar se todos os comandos foram visitados
-      if(count == tm.commands.length) return error
+      if(count == tm.delta.length) return error
     }
   }
 }
 
 const machineVerification = (tm) => {
-  //verificar empty
-  if(!tm.alphabet.includes(tm.empty)) return false
+  //verificar estado inicial
+  if(!tm.Q.includes(tm.q0)) return false
 
-  //verificar estados e alfabeto
-  for(let girininho of tm.commands){
-    if(!tm.states.includes(girininho.read.currentState)) return false
-    if(!tm.states.includes(girininho.execute.goState)) return false 
-    if(!tm.alphabet.includes(girininho.read.char)) return false
-    if(!tm.alphabet.includes(girininho.execute.write)) return false
+  //verificar estados finais
+  for(let endState of tm.F){
+    if(!tm.Q.includes(endState)) return false
+  }
+
+  //verificar caractere vazio
+  if(!tm.sigma.includes(tm.B)) return false
+
+  //verificar comandos
+  for(let girininho of tm.delta){
+    if(!tm.Q.includes(girininho.read.currentState)) return false
+    if(!tm.sigma.includes(girininho.read.char)) return false
+    if(!tm.Q.includes(girininho.execute.goState)) return false 
+    if(!tm.sigma.includes(girininho.execute.write)) return false
+    if(!girininho.direction == "R" || 
+       !girininho.direction == "L" || 
+       !girininho.direction == "S") return false
   }
 
   return true
 }
-
 
 //********************************* MAQUINA DE TURING ********************************** */
 //OBS: Para resolver a maquina não precisaria informar todos 
 // estes dados, como por exemplo os estados e alfabeto, porém 
 // decidi usar todos, respeitando a descrição formal.
 
-//substituir abc por 123 respectivamente
-//imagem: https://imgur.com/a/AqTsfo7
-const turingMachine1 = TM({
-  states: "0,1",
-  alphabet: "a,b,c,1,2,3,-", 
-  test: "abcabc",
-  initState: "0",
-  endState: "1",
-  empty: "-",
-  commands: [
+// substituir abc por 123 respectivamente
+// imagem: https://imgur.com/a/AqTsfo7
+const turingMachine1 = createTuringMachine({
+  Q: "0,1",
+  sigma: "a,b,c,1,2,3,-", 
+  gama: "abcabc",
+  q0: "0",
+  F: "1",
+  B: "-",
+  delta: [
     girininho("0,a,0,1,R"),
     girininho("0,b,0,2,R"),
     girininho("0,c,0,3,R"),
@@ -124,16 +132,16 @@ const turingMachine1 = TM({
 console.log(calculate(turingMachine1))
 
 
-//validar palavras com abc, aceitando 2x "a" e 2x "c"
-//imagem: https://imgur.com/a/vcl9Y3G
-const turingMachine2 = TM({
-  states: "0,1,2,3,4,5,6,7,8,9",
-  alphabet: "a,b,c,-", 
-  test: "abcabcabc",
-  initState: "0",
-  endState: "9",
-  empty: "-",
-  commands: [
+// validar palavras com abc, aceitando 2x "a" e 2x "c"
+// imagem: https://imgur.com/a/vcl9Y3G
+const turingMachine2 = createTuringMachine({
+  Q: "0,1,2,3,4,5,6,7,8,9",
+  sigma: "a,b,c,-", 
+  gama: "abcabcabc",
+  q0: "0",
+  F: "9",
+  B: "-",
+  delta: [
     girininho("0,b,0,b,R"),
     girininho("0,a,1,a,R"),
     girininho("0,c,7,c,R"),
@@ -167,16 +175,16 @@ const turingMachine2 = TM({
 console.log(calculate(turingMachine2))
 
 
-// //operação matematica - SOMA
-// //imagem: https://imgur.com/3hh8cfH
-const turingMachine3 = TM({
-  states: "0,1,2,3",
-  alphabet: "1,+,¬", 
-  test: "11+111",
-  initState: "0",
-  endState: "3",
-  empty: "¬",
-  commands: [
+// operação matematica - SOMA
+// imagem: https://imgur.com/3hh8cfH
+const turingMachine3 = createTuringMachine({
+  Q: "0,1,2,3",
+  sigma: "1,+,¬", 
+  gama: "11+111",
+  q0: "0",
+  F: "3",
+  B: "¬",
+  delta: [
     girininho("0,1,0,1,R"),
     girininho("0,+,1,1,R"),
     girininho("1,1,1,1,R"),
